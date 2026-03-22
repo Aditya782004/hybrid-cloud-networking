@@ -8,7 +8,7 @@ This repository assumes KVM, QEMU, and Libvirt are already installed and configu
 
 ## Architecture Diagram
 
-![Architecture Diagram](architecture/architecture-diagram.svg)
+![Architecture Diagram](architecture/architecture-diagram.png)
 
 ---
 
