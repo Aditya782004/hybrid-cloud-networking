@@ -1,7 +1,10 @@
 # Hybrid Cloud-to-Local Virtualized Network Architecture
 
-IMPORTANT NOTICE:-
-(This Repo Assumes That You have Already Setup KVM,Qemu,Libvirt)
+## Important Notice
+
+This repository assumes KVM, QEMU, and Libvirt are already installed and configured.
+
+---
 
 ## Architecture Diagram
 
@@ -13,13 +16,15 @@ IMPORTANT NOTICE:-
 
 This project demonstrates a hybrid cloud architecture where an AWS-hosted service securely communicates with locally hosted virtual machines.
 
-It simulates a real-world scenario where cloud infrastructure must integrate with on-premise systems using encrypted networking and controlled traffic routing.
+It models a real-world setup where cloud infrastructure integrates with on-premise systems using encrypted networking and controlled routing.
+
+The system is structured into modular components (bridge, DHCP, routing, NAT) to clearly separate responsibilities.
 
 ---
 
 ## Problem Statement
 
-Modern systems often require communication between cloud and local environments. Achieving this securely while maintaining control over networking, routing, and access is complex.
+Modern systems often require secure communication between cloud and local environments while maintaining full control over routing, networking, and access.
 
 ---
 
@@ -28,12 +33,12 @@ Modern systems often require communication between cloud and local environments.
 This project implements a hybrid networking model using:
 
 * AWS EC2 as a public entry point
+* NGINX on EC2 for reverse proxy and TLS termination
 * Tailscale (WireGuard) for encrypted connectivity
 * Local KVM virtual machines
 * Linux bridge networking for VM communication
-* NGINX reverse proxy for request routing
-* dnsmasq for DHCP and DNS
-* iptables for NAT and internet access
+* dnsmasq for DHCP (IP assignment to VMs)
+* iptables for NAT and outbound access
 
 ---
 
@@ -42,34 +47,58 @@ This project implements a hybrid networking model using:
 1. User sends request to domain (example.com)
 2. DNS resolves to AWS EC2 public IP
 3. Request enters AWS via Internet Gateway
-4. Security Group allows inbound traffic
-5. EC2 forwards traffic through Tailscale tunnel
-6. Encrypted traffic reaches local host
-7. Linux bridge routes packet to VM
-8. NGINX forwards request to service
-9. Response returns through the same path
+4. NGINX on EC2 terminates TLS and forwards traffic
+5. Traffic is sent through Tailscale tunnel
+6. Packet reaches local machine via `tailscale0`
+7. Linux kernel performs routing using prefix matching
+8. Packet is forwarded to bridge (`br-vm`)
+9. Bridge delivers traffic to target VM (10.10.0.x)
+10. Response returns through the same path
 
 ---
 
 ## Key Concepts
 
-**Hybrid Cloud Networking**
+### Hybrid Cloud Networking
 
-* Connecting cloud infrastructure with local systems
-* Secure communication across environments
+* Extending cloud networking into local infrastructure
+* Secure cloud-to-on-prem communication
 
-**Linux Networking**
+---
 
-* Layer 2 bridging and ARP
-* Layer 3 routing and CIDR matching
+### Linux Networking
+
+* Layer 2 bridging (ARP, switching)
+* Layer 3 routing (CIDR, prefix matching)
 * NAT using iptables
+* DHCP using dnsmasq for dynamic IP allocation
 
-**Virtualization**
+---
 
-* KVM and Libvirt for VM management
+### DHCP (dnsmasq)
+
+* Provides IP addresses to VMs connected to the bridge
+* Maintains persistent lease mapping
+* Uses `br-vm` as the serving interface
+
+---
+
+### Routing (Important)
+
+* Tailscale installs policy routing rules
+* Uses a separate routing table (table 52)
+* Linux kernel handles forwarding (no user-space proxy required)
+
+---
+
+### Virtualization
+
+* KVM and Libvirt for VM lifecycle
 * Persistent bridge-based networking
 
-**Secure Networking**
+---
+
+### Secure Networking
 
 * WireGuard-based encrypted tunnels via Tailscale
 
@@ -78,10 +107,10 @@ This project implements a hybrid networking model using:
 ## Tech Stack
 
 * AWS (EC2, VPC)
+* NGINX (reverse proxy + TLS termination)
 * Tailscale (WireGuard)
 * KVM, Libvirt
 * Linux networking (bridge, routing, NAT)
-* NGINX
 * dnsmasq
 
 ---
@@ -89,42 +118,62 @@ This project implements a hybrid networking model using:
 ## Features
 
 * Secure hybrid cloud architecture
-* Encrypted communication between environments
+* Single entry point via EC2 (TLS termination)
+* Encrypted communication using WireGuard
+* Kernel-based routing (no extra proxy layers locally)
 * Scalable VM networking
 * NAT-based internet access for VMs
-* Reverse proxy routing
 
 ---
 
 ## Project Structure
 
-```
+```text id="structure-final"
 hybrid-cloud-networking/
-├── architecture/
-├── kvm/
-├── nginx/
-├── dns/
-└── docs/
+├── architecture/        # Diagram and flow
+├── nginx/               # EC2 reverse proxy config
+├── networking/
+│   ├── bridge/          # L2 bridge setup (no DHCP)
+│   ├── dns/             # DHCP using dnsmasq
+│   ├── nat/             # NAT (iptables)
+│   ├── routing/         # Kernel routing + debugging
+│   └── tailscale/       # Encrypted connectivity
+├── kvm/                 # VM creation and disk management
+└── docs/                # High-level setup and troubleshooting
 ```
+
+---
+
+## About docs/
+
+The `docs/` directory contains:
+
+* End-to-end setup instructions
+* Troubleshooting guides
+* Common issues and fixes
+
+This is separate from `networking/`, which explains how the system works internally.
 
 ---
 
 ## What I Learned
 
 * Designing hybrid cloud systems
-* Linux networking internals
+* Linux networking internals (routing, ARP, NAT)
+* Policy-based routing and multiple routing tables
 * Virtualization networking
-* Secure communication across networks
 * Debugging multi-layer network flows
 
 ---
 
-Author
+## Author
 
 Aditya Vaghasiya
 DevOps Engineer
 Ahmedabad, India
 
-#If you found this useful
+---
 
-Give it a star ⭐ and feel free to connect!
+## If you found this useful
+
+Give it a star and feel free to connect.
