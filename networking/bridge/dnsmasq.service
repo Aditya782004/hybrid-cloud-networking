@@ -1,0 +1,15 @@
+[Unit]
+Description=dnsmasq DHCP service for br-vm bridge
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/dnsmasq \
+  --keep-in-foreground \
+  --conf-file=/etc/dnsmasq.d/br-vm.conf \
+  --user=dnsmasq
+
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

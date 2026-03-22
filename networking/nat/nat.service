@@ -1,0 +1,11 @@
+[Unit]
+Description=Apply NAT rules for VM network
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/hybrid-cloud/networking/nat/nat-rules.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
