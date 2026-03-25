@@ -12,9 +12,9 @@ pipeline{
             url: 'https://github.com/Aditya782004/hybrid-cloud-networking'
         }
       }
-      stage("Git Checkout"){
+      stage("Git checkout completed"){
         steps{
-          echo 'cehckout completed'
+          echo 'checkout completed'
       }
     }
   }
