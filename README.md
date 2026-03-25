@@ -170,7 +170,7 @@ This is separate from `networking/`, which explains how the system works interna
 
 Aditya Vaghasiya
 DevOps Engineer
-Ahmedabad, India
+Ahmedabad, India.
 
 ---
 
