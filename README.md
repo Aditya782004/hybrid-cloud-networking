@@ -2,7 +2,7 @@
 
 ## Important Notice
 
-This repository assumes KVM, QEMU, and Libvirt are already installed and configured
+This repository assumes KVM, QEMU, and Libvirt are already installed and configured.
 
 ---
 
