@@ -5,6 +5,7 @@ pipeline{
       steps{
         sh 'echo multibranch pipeline works'
       }
+    }
       stage("Git Checkout"){
         steps{
           git branch: 'main'
@@ -14,8 +15,8 @@ pipeline{
       stage("Git Checkout"){
         steps{
           echo 'cehckout completed'
-        }
       }
     }
   }
 }
+
